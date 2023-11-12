@@ -17,34 +17,30 @@
 	  </div>
 	</div>
 	<!-- Placeholder for the next section -->
-	<div class="next-section" ref="nextSection">
-	  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum.</p>
+	<div class="next-section" ref="nextSection" id="next-section">
+		<BodyContent />
 	</div>
   </template>
   
   <script>
   import { gsap } from "gsap";
-  import { ScrollTrigger } from "gsap/ScrollTrigger";
-  // Ensure that the import path is correct
   import VoronoiStippling from './VoronoiStippling.vue'; // Adjust the path as necessary
-  
-  gsap.registerPlugin(ScrollTrigger);
+  import BodyContent from './BodyContent.vue'; // Adjust the path as necessary
   
   export default {
 	components: {
-	  VoronoiStippling
+	  VoronoiStippling,
+	  BodyContent
 	},
 	mounted() {
 	  this.animateText();
-	  this.setupScrollTrigger();
+	  this.setupScrollListener();
 	},
 	methods: {
 	  animateText() {
-		// Use $refs to access the element
 		const heading = this.$refs.typewriterContainer.querySelector('.heading');
 		const subtitle = this.$refs.typewriterContainer.querySelector('.subtitle');
   
-		// Animate the heading
 		gsap.from(heading, {
 		  y: 50,
 		  opacity: 1,
@@ -52,7 +48,7 @@
 		  duration: 2,
 		  onComplete: this.emitComplete
 		});
-		// Animate the subtitle
+  
 		gsap.from(subtitle, {
 		  y: 50,
 		  opacity: 1,
@@ -64,25 +60,32 @@
 	  emitComplete() {
 		this.$emit('animationComplete');
 	  },
-	  setupScrollTrigger() {
-		const nextSection = this.$refs.nextSection;
-		if (nextSection) {
-		  ScrollTrigger.create({
-			trigger: nextSection,
-			start: "top center",
-			onEnter: () => {
-			  // Use GSAP to smoothly scroll to the next section
-			  gsap.to(window, {
-				duration: 1.5,
-				scrollTo: { y: nextSection, offsetY: 70 },
-				ease: "power2.inOut"
+	  setupScrollListener() {
+		let scrolled = false;
+  
+		const scrollHandler = () => {
+		  if (!scrolled) {
+			const nextSection = this.$refs.nextSection;
+  
+			if (nextSection) {
+			  const offset = nextSection.offsetTop;
+			  window.scrollTo({
+				top: offset,
+				behavior: 'smooth'
 			  });
+			  scrolled = true;
 			}
-		  });
-		}
+		  }
+  
+		  // Remove the event listener after the first scroll
+		  window.removeEventListener("scroll", scrollHandler);
+		};
+  
+		// Attach the event listener
+		window.addEventListener("scroll", scrollHandler);
 	  }
 	}
-  }
+  };
   </script>
   
   <style scoped>
